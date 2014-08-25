@@ -9,6 +9,7 @@ import org.apache.commons.io.FileUtils;
 import android.app.Activity;
 import android.app.ActionBar;
 import android.app.Fragment;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -17,6 +18,7 @@ import android.view.View;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -28,6 +30,7 @@ public class TodoActivity extends Activity {
 	ArrayList <String> items;
 	ArrayAdapter<String> itemsAdapter;
 	ListView lvItems; 
+	private final int REQUEST_CODE = 20;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,29 +58,20 @@ public class TodoActivity extends Activity {
 		}
 		});
 		
+		lvItems.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int position,
+					long arg3) {
+				 Intent i = new Intent(TodoActivity.this, EditItemActivity.class);
+				 i.putExtra("item", items.get(position)); 
+				 i.putExtra("index", position);
+				 startActivityForResult(i, REQUEST_CODE);
+				
+			}
+		});
+		
 	}
 
-
-	@Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.todo, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-    
     public void addTodoItem(View v)
     {
     	EditText etNewItem = (EditText)findViewById(R.id.etNewItem);
@@ -114,5 +108,18 @@ public class TodoActivity extends Activity {
     		ex.printStackTrace();
     	}
     }
+    
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+      // REQUEST_CODE is defined above
+      if (resultCode == RESULT_OK && requestCode == REQUEST_CODE) {
+         String item = data.getExtras().getString("item");
+         int index = data.getExtras().getInt("index");
+         items.set(index, item);
+         saveItems();
+         itemsAdapter.notifyDataSetChanged();
+      }
+    } 
+
 
 }
