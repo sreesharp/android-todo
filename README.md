@@ -1,4 +1,7 @@
-android-todo
-============
+Simple ToDO Application
+=======================
 
-TODO application for Android training 
+Use cases supported
+- Add item to the ToDo list
+- Remove item (long click) from the list
+- Edit item (single click) 
