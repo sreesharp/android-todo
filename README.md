@@ -8,4 +8,4 @@ Use cases supported
 - Persist items in device file system
  
 
-![Video Walkthrough](todo.gif)
+![Video Walkthrough](Todo.gif)
