@@ -3,32 +3,21 @@ package com.sreesharp.simpletodo;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-
+import java.util.List;
 import org.apache.commons.io.FileUtils;
-
 import android.app.Activity;
-import android.app.ActionBar;
-import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnLongClickListener;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ListView;
-import android.os.Build;
 
 public class TodoActivity extends Activity {
 
-	ArrayList <String> items;
-	ArrayAdapter<String> itemsAdapter;
+	ArrayList <ToDoItem> items;
+	ItemAdapter itemsAdapter;
 	ListView lvItems; 
 	private final int REQUEST_CODE = 20;
 	
@@ -36,10 +25,10 @@ public class TodoActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_todo);
-        items = new ArrayList<String>();
+        items = new ArrayList<ToDoItem>();
         lvItems = (ListView) findViewById(R.id.lvItems);
         readItems();
-        itemsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items);
+        itemsAdapter = new ItemAdapter(this, R.layout.list_item, items);
         lvItems.setAdapter(itemsAdapter);
         setupListViewListener();
     }
@@ -65,6 +54,7 @@ public class TodoActivity extends Activity {
 				 Intent i = new Intent(TodoActivity.this, EditItemActivity.class);
 				 i.putExtra("item", items.get(position)); 
 				 i.putExtra("index", position);
+				 i.putExtra("type", "edit");
 				 startActivityForResult(i, REQUEST_CODE);
 				
 			}
@@ -74,10 +64,9 @@ public class TodoActivity extends Activity {
 
     public void addTodoItem(View v)
     {
-    	EditText etNewItem = (EditText)findViewById(R.id.etNewItem);
-    	items.add(etNewItem.getText().toString());
-    	etNewItem.setText("");
-    	saveItems();
+		Intent i = new Intent(TodoActivity.this, EditItemActivity.class);
+		i.putExtra("type", "new");
+		startActivityForResult(i, REQUEST_CODE);
     }
     
     private void readItems()
@@ -86,11 +75,19 @@ public class TodoActivity extends Activity {
     	File todoFile = new File(fileDir, "todo.txt");
     	try
     	{
-    		items = new ArrayList<String>(FileUtils.readLines(todoFile));
+    		List<String> fileItems = FileUtils.readLines(todoFile);
+    		for (String row: fileItems)
+    		{
+    			String[] parts = row.split("~");
+    			
+    			ToDoDate date = new ToDoDate(parts[1]);
+    			Priority priority = Priority.valueOf(parts[2]);
+    			items.add(new ToDoItem(parts[0], date, priority));
+    		}
     	}
-    	catch(IOException ex)
+    	catch(Exception ex)
     	{
-    		items = new ArrayList<String>();
+    		items = new ArrayList<ToDoItem>();
     		ex.printStackTrace();
     	}
     }
@@ -101,7 +98,13 @@ public class TodoActivity extends Activity {
     	File todoFile = new File(fileDir, "todo.txt");
     	try
     	{
-    		FileUtils.writeLines(todoFile,items);
+    		ArrayList<String> rows = new ArrayList<String>();
+    		for (ToDoItem item: items)
+    		{
+    			String row = item.getTitle()+"~"+item.getDueDate().toString()+"~"+ item.getPriority().toString();
+    			rows.add(row);
+    		}
+    		FileUtils.writeLines(todoFile,rows);
     	}
     	catch(IOException ex)
     	{
@@ -113,9 +116,16 @@ public class TodoActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
       // REQUEST_CODE is defined above
       if (resultCode == RESULT_OK && requestCode == REQUEST_CODE) {
-         String item = data.getExtras().getString("item");
-         int index = data.getExtras().getInt("index");
-         items.set(index, item);
+         ToDoItem item = (ToDoItem) data.getSerializableExtra("item");
+         if(data.getExtras().getString("type").equals("new"))
+         {
+        	 items.add(item);
+         }
+         else
+         {
+        	 int index = data.getExtras().getInt("index");
+        	 items.set(index, item);
+         }
          saveItems();
          itemsAdapter.notifyDataSetChanged();
       }

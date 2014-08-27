@@ -11,31 +11,19 @@
     <ListView
         android:id="@+id/lvItems"
         android:layout_width="match_parent"
-        android:layout_height="380dp"
+        android:layout_height="400dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true" >
     </ListView>
-
-    <EditText
-        android:id="@+id/etNewItem"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/lvItems"
-        android:layout_below="@+id/lvItems"
-        android:layout_marginTop="14dp"
-        android:hint="Enter new Item"
-        android:ems="10" >
-    </EditText>
 
     <Button
         android:id="@+id/btnAddItem"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/etNewItem"
-        android:layout_alignRight="@+id/lvItems"
-        android:layout_alignBaseline="@+id/etNewItem"
+        android:layout_below="@+id/lvItems"
+        android:layout_centerHorizontal="true"
         android:onClick="addTodoItem"
-        android:text="Add" />
+        android:text="Add New Item" />
 
 </RelativeLayout>
 
